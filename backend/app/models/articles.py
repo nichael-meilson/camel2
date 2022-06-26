@@ -66,6 +66,10 @@ class CreateArticle(ArticleBase):
     pass
 
 
+class GetArticle(ArticleBase):
+    pass
+
+
 class ArticleInDB(IDModelMixin):
     name: str
     pmid: str

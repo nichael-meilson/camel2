@@ -6,8 +6,8 @@ from typing import List
 
 from fastapi import APIRouter
 from fastapi import APIRouter, Body, Depends
-from starlette.status import HTTP_201_CREATED
-from app.models.articles import CreateArticle, ArticleInDB
+from starlette.status import HTTP_201_CREATED, HTTP_200_OK
+from app.models.articles import CreateArticle, ArticleInDB, GetArticle
 from app.db.repositories.articles import ArticlesRepository
 from app.api.dependencies.database import get_repository
 
@@ -15,13 +15,9 @@ from app.api.dependencies.database import get_repository
 router = APIRouter()
 
 
-@router.get("/")
-async def get_articles() -> List[dict]:
-    articles = [
-        {"id": 1, "author": "Charles Darwin", "title": "Origin of Species", "date": "1900-01-01"},
-        {"id": 2, "author": "Sigmund Freud", "title": "Mommy Issues", "date": "1900-01-02"}
-    ]
-
+@router.get("/", response_model=List[GetArticle], name="articles:get-article", status_code=HTTP_200_OK)
+async def get_articles(articles_repo: ArticlesRepository = Depends(get_repository(ArticlesRepository))) -> List[GetArticle]:
+    articles = await articles_repo.get_all_articles()
     return articles
 
 

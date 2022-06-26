@@ -2,9 +2,10 @@
 Michael Neilson <github: nichael-meilson>
 2022-06-25
 '''
-from app.db.repositories.base import BaseRepository
-from app.models.articles import CreateArticle, ArticleInDB
+from typing import List
 
+from app.db.repositories.base import BaseRepository
+from app.models.articles import CreateArticle, ArticleInDB, GetArticle
 
 CREATE_ARTICLE_QUERY = """
     INSERT INTO articles (id, name, species, goal, num_lines, setup, recipient, medium, selective_condition, 
@@ -30,7 +31,12 @@ class ArticlesRepository(BaseRepository):
 
     async def create_article(self, *, new_article: CreateArticle) -> ArticleInDB:
         query_values = new_article.dict()
-        cleaning = await self.db.fetch_one(query=CREATE_ARTICLE_QUERY, values=query_values)
+        created_article = await self.db.fetch_one(query=CREATE_ARTICLE_QUERY, values=query_values)
+        return ArticleInDB(**created_article)
 
-        return ArticleInDB(**cleaning)
+    async def get_all_articles(self) -> List[GetArticle]:
+        get_articles_query = """SELECT * FROM articles ORDER BY name DESC"""
+        all_articles = await self.db.fetch_all(query=get_articles_query)
+        articles_list = [GetArticle(**article) for article in all_articles]
+        return articles_list
 
