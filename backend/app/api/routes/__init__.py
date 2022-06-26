@@ -4,7 +4,7 @@ Michael Neilson <github: nichael-meilson>
 '''
 from fastapi import APIRouter
 
-from app.api.routes.documents import router as documents_router
+from app.api.routes.articles import router as documents_router
 
 
 router = APIRouter()
