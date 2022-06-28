@@ -10,5 +10,5 @@ from app.api.routes.articles import router as documents_router
 router = APIRouter()
 
 
-router.include_router(documents_router, prefix="/articles", tags=["articles"])
+router.include_router(documents_router, prefix="/article", tags=["articles"])
 

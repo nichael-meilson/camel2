@@ -4,7 +4,7 @@ Michael Neilson <github: nichael-meilson>
 '''
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from fastapi import APIRouter, Body, Depends
 from starlette.status import HTTP_201_CREATED, HTTP_200_OK
 from app.models.articles import CreateArticle, ArticleInDB, GetArticle
@@ -15,13 +15,23 @@ from app.api.dependencies.database import get_repository
 router = APIRouter()
 
 
-@router.get("/", response_model=List[GetArticle], name="articles:get-article", status_code=HTTP_200_OK)
+@router.get("s/", response_model=List[GetArticle], name="articles:get-article", status_code=HTTP_200_OK)
 async def get_articles(articles_repo: ArticlesRepository = Depends(get_repository(ArticlesRepository))) -> List[GetArticle]:
     articles = await articles_repo.get_all_articles()
     return articles
 
 
-@router.post("/", response_model=ArticleInDB, name="articles:create-article", status_code=HTTP_201_CREATED)
+@router.get("/", response_model=GetArticle, name="article:get-article", status_code=HTTP_200_OK)
+async def get_article(articles_repo: ArticlesRepository = Depends(get_repository(ArticlesRepository)),
+                      id: str = Query(None, description="The ID of the article"),
+                      author: str = Query(None, description="The name of the author")) -> GetArticle:
+    if id is None and author is not None:
+        return await articles_repo.get_article_from_name(author)
+    if author is None and id is not None:
+        return await articles_repo.get_article_from_id(id)
+
+
+@router.post("s/", response_model=ArticleInDB, name="articles:create-article", status_code=HTTP_201_CREATED)
 async def create_new_article(
     new_article: CreateArticle = Body(..., embed=True),
     articles_repo: ArticlesRepository = Depends(get_repository(ArticlesRepository)),
