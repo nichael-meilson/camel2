@@ -1,21 +1,82 @@
-fail_fast: true
-
 repos:
-  - repo: https://github.com/ambv/black
-    rev: 22.3.0
+-   repo: local
     hooks:
-      - id: black
-        args: [--diff, --check]
+    -   id: isort
+        name: Organize imports
+        entry: isort
+        args:
+            - .
+        language: system
+        types:
+            - python
+        pass_filenames: false
+        always_run: true
 
-  - repo: https://github.com/pre-commit/mirrors-pylint
-    rev: v3.0.0a3
-    hooks:
-      - id: pylint
-        args: [--disable=all, --enable=unused-import]
+    -   id: black
+        name: Format code
+        entry: black
+        args:
+            - --target-version=py310
+            - src
+#            - tests
+#            - features
+        language: system
+        types:
+            - python
+        pass_filenames: false
+        always_run: true
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.902
-    hooks:
-      - id: mypy
-        exclude: ^tests/
-        args: [--strict]
+    -   id: flake8
+        name: Check if code format is respected and dont have obvious vulnerabilities
+        entry: flake8
+        args:
+            - src
+#            - tests
+#            - features
+            - --max-line-length=130
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+    -   id: mypy
+        name: Type check code
+        entry: mypy
+        args:
+            - src
+            - --ignore-missing-imports
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+#
+#    -   id: terraform-format
+#        name: Run the format for terraform
+#        entry: terraform
+#        args:
+#            - fmt
+#            - infrastructure
+#        language: system
+#        pass_filenames: false
+#        always_run: true
+#
+#    -   id: terraform-validate
+#        name: Validate terraform code
+#        entry: terraform
+#        args:
+#            - validate
+#        language: system
+#        pass_filenames: false
+#        always_run: true
+#
+#    -   id: unit-tests
+#        name: Run unit-tests
+#        entry: env DATABASE_PROJECT=local PYTHONPATH=src pytest
+#        args:
+#            - --cov=src
+#            - -v
+#            - --cov-fail-under=10
+#        language: system
+#        types: [python]
+#        pass_filenames: false
+#        always_run: true
