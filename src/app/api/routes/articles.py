@@ -4,8 +4,8 @@ Michael Neilson <github: nichael-meilson>
 """
 from typing import List
 
-from fastapi import APIRouter, Body, Depends, Query
-from starlette.status import HTTP_201_CREATED, HTTP_200_OK
+from fastapi import APIRouter, Body, Depends, Query, HTTPException
+from starlette.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND
 from app.models.articles import CreateArticle, ArticleInDB, GetArticle
 from app.db.repositories.articles import ArticlesRepository
 from app.api.dependencies.database import get_repository
@@ -32,13 +32,22 @@ async def get_articles(
 )
 async def get_article(
     articles_repo: ArticlesRepository = Depends(get_repository(ArticlesRepository)),
-    id_: str = Query(None, description="The ID of the article"),
+    id_: str = Query(None, alias="id", description="The ID of the article"),
     author: str = Query(None, description="The name of the author"),
-) -> GetArticle:
-    if id_ is None and author is not None:
-        return await articles_repo.get_article_from_name(author)
-    if author is None and id_ is not None:
-        return await articles_repo.get_article_from_id(id_)
+) -> GetArticle | HTTPException | ValueError:
+    if author and not id_:
+        article = await articles_repo.get_article_from_name(author)
+    if id_ and not author:
+        article = await articles_repo.get_article_from_id(id_)
+    if not author and not id_:
+        raise ValueError("Must have one of author or id.")
+    if author and id_:
+        raise ValueError("Must have only one of author or id.")
+    if not article:  # type: ignore
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND, detail="No cleaning found with that id."
+        )
+    return article  # type: ignore
 
 
 @router.post(

@@ -37,17 +37,19 @@ class ArticlesRepository(BaseRepository):
         return ArticleInDB(**created_article)
 
     async def get_all_articles(self) -> List[GetArticle]:
-        get_articles_query = """SELECT * FROM articles ORDER BY name DESC"""
+        get_articles_query = """SELECT * FROM articles ORDER BY name DESC;"""
         all_articles = await self.db.fetch_all(query=get_articles_query)
         articles_list = [GetArticle(**article) for article in all_articles]
         return articles_list
 
     async def get_article_from_id(self, article_id: str) -> GetArticle:
-        get_article_query = f"SELECT * FROM articles WHERE id = {article_id}"
+        get_article_query = f"SELECT * FROM articles WHERE id = {article_id};"
         article = await self.db.fetch_one(query=get_article_query)
         return GetArticle(**article)
 
     async def get_article_from_name(self, author_name: str) -> GetArticle:
-        get_article_query = f"SELECT * FROM articles WHERE name ILIKE '%{author_name}%'"
+        get_article_query = (
+            f"SELECT * FROM articles WHERE name ILIKE '%{author_name}%';"
+        )
         article = await self.db.fetch_one(query=get_article_query)
         return GetArticle(**article)
